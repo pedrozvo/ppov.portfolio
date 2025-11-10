@@ -1,0 +1,18 @@
+Este es un archivo placeholder para el CV de Pedro Pablo Oyarzún.
+
+Para incluir tu CV real:
+
+1. Reemplaza este archivo con tu CV en formato PDF
+2. Asegúrate de que el nombre del archivo sea "cv-pedro-oyarzun.pdf"
+3. El archivo debe estar en la carpeta "public/"
+
+El enlace en el componente About.js ya está configurado para apuntar a "/cv-pedro-oyarzun.pdf"
+
+Recomendaciones para el CV:
+- Máximo 2 páginas
+- Formato PDF
+- Incluir información de contacto
+- Experiencia laboral relevante
+- Habilidades técnicas
+- Proyectos destacados
+- Formación académica 
