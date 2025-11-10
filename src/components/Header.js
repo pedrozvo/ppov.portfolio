@@ -1,137 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { FiMenu, FiX } from 'react-icons/fi';
-import { AnimatePresence } from 'framer-motion';
-
-const HeaderContainer = styled(motion.header)`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-
-  &[data-theme="dark"] {
-    background: rgba(15, 23, 42, 0.95);
-  }
-`;
-
-const Nav = styled.nav`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 70px;
-`;
-
-const Logo = styled(motion.div)`
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  cursor: pointer;
-`;
-
-const NavLinks = styled.div`
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const NavLink = styled(motion.a)`
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  position: relative;
-  cursor: pointer;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary-color);
-    transition: width 0.3s ease;
-  }
-
-  &:hover::after {
-    width: 100%;
-  }
-`;
-
-const MobileMenuButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  cursor: pointer;
-
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const MobileMenu = styled(motion.div)`
-  position: fixed;
-  top: 70px;
-  left: 0;
-  right: 0;
-  background: var(--background-color);
-  border-bottom: 1px solid var(--border-color);
-  padding: 1rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-
-  @media (min-width: 769px) {
-    display: none;
-  }
-`;
-
-const MobileNavLink = styled.a`
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  width: 100%;
-  text-align: center;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: var(--surface-color);
-    color: var(--primary-color);
-  }
-`;
+import { throttle } from '../utils/throttle';
+import styles from './Header.module.css';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = throttle(() => {
       setIsScrolled(window.scrollY > 50);
-    };
+    }, 100);
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -152,64 +33,65 @@ const Header = () => {
   ];
 
   return (
-    <HeaderContainer
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        boxShadow: isScrolled ? '0 2px 20px var(--shadow-color)' : 'none'
-      }}
+    <header 
+      className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}
     >
-      <Nav>
-        <Logo
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <nav className={styles.nav}>
+        <div 
+          className={styles.logo}
           onClick={() => scrollToSection('home')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && scrollToSection('home')}
         >
           PedroDev
-        </Logo>
+        </div>
 
-        <NavLinks>
+        <div className={styles.navLinks}>
           {navItems.map((item) => (
-            <NavLink
+            <a
               key={item.id}
-              onClick={() => scrollToSection(item.id)}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              href={`#${item.id}`}
+              className={styles.navLink}
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection(item.id);
+              }}
             >
               {item.label}
-            </NavLink>
+            </a>
           ))}
-        </NavLinks>
+        </div>
 
-        <MobileMenuButton
+        <button
+          className={styles.mobileMenuButton}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? <FiX /> : <FiMenu />}
-        </MobileMenuButton>
-      </Nav>
+        </button>
+      </nav>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <MobileMenu
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {navItems.map((item) => (
-              <MobileNavLink
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-              >
-                {item.label}
-              </MobileNavLink>
-            ))}
-          </MobileMenu>
-        )}
-      </AnimatePresence>
-    </HeaderContainer>
+      {isMobileMenuOpen && (
+        <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}>
+          {navItems.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={styles.mobileNavLink}
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection(item.id);
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </header>
   );
 };
 
-export default Header; 
+export default React.memo(Header);
